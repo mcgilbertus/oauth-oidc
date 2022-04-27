@@ -1,0 +1,118 @@
+{
+  "accessToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6IkMzRjdDN0ZGMUY2MjlCRUYwNkIwQjMxNjY3ODcwNUJEIiwidHlwIjoiYXQrand0In0.eyJpc3MiOiJodHRwczovL2xvY2FsaG9zdDo0MDAxIiwibmJmIjoxNjUwOTI0MzMyLCJpYXQiOjE2NTA5MjQzMzIsImV4cCI6MTY1MDkyNzkzMiwic2NvcGUiOlsiYXBpMSJdLCJjbGllbnRfaWQiOiJjbGllbnQiLCJqdGkiOiIwMTM2MTRFNzc1MzQ0QUU2MzNGNDcxNjY1NzE2Nzg0NCJ9.UcupzBVjx7cjkVQeR9KGlb7NZi4Ef6K3AhGh_-E9kY4rSGHZH7lJXKUW8HYhC0x6QYnWU3mlvogTlvQ5cIhoNLJRejCQ8LaXXrY012HDw2IMDYsDqhS4S9KJ8hTVgy80w8wzJUT26CyKKLEIZyWHXin7D8sJqRVQNApIOXWCs66EHLaoS_Wmzyo7AqNVVMGaujv9XgKdeXt_BWeWm0mnlVjCqul10p-RK4_y5MeJEVW8bQa7vfblkIvEet3znERhpFkRIzhegoRpdXGrC3syDlgb3vibPhMtqaezZIYnGzi7ibPDM6dBAuR3nZKy4s5tWJ9ck4Y84MWV5jY0lFr_jQ",
+  "identityToken": null,
+  "scope": "api1",
+  "issuedTokenType": null,
+  "tokenType": "Bearer",
+  "refreshToken": null,
+  "errorDescription": null,
+  "expiresIn": 3600,
+  "httpResponse": {
+    "version": "1.1",
+    "content": {
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": [
+            "application/json; charset=utf-8"
+          ]
+        }
+      ]
+    },
+    "statusCode": 200,
+    "reasonPhrase": "OK",
+    "headers": [
+      {
+        "key": "Date",
+        "value": [
+          "Mon, 25 Apr 2022 22:05:32 GMT"
+        ]
+      },
+      {
+        "key": "Server",
+        "value": [
+          "Kestrel"
+        ]
+      },
+      {
+        "key": "Cache-Control",
+        "value": [
+          "no-store, no-cache, max-age=0"
+        ]
+      },
+      {
+        "key": "Pragma",
+        "value": [
+          "no-cache"
+        ]
+      },
+      {
+        "key": "Transfer-Encoding",
+        "value": [
+          "chunked"
+        ]
+      }
+    ],
+    "trailingHeaders": [],
+    "requestMessage": {
+      "version": "1.1",
+      "versionPolicy": 0,
+      "content": {
+        "headers": [
+          {
+            "key": "Content-Type",
+            "value": [
+              "application/x-www-form-urlencoded"
+            ]
+          },
+          {
+            "key": "Content-Length",
+            "value": [
+              "40"
+            ]
+          }
+        ]
+      },
+      "method": {
+        "method": "POST"
+      },
+      "requestUri": "https://localhost:4001/connect/token",
+      "headers": [
+        {
+          "key": "Accept",
+          "value": [
+            "application/json"
+          ]
+        },
+        {
+          "key": "Authorization",
+          "value": [
+            "Basic Y2xpZW50OnNlY3JldA=="
+          ]
+        },
+        {
+          "key": "traceparent",
+          "value": [
+            "00-1671e93d1166e37927d7c67092246eb7-c984e8028b496198-00"
+          ]
+        }
+      ],
+      "properties": {},
+      "options": {}
+    },
+    "isSuccessStatusCode": true
+  },
+  "raw": "{\"access_token\":\"eyJhbGciOiJSUzI1NiIsImtpZCI6IkMzRjdDN0ZGMUY2MjlCRUYwNkIwQjMxNjY3ODcwNUJEIiwidHlwIjoiYXQrand0In0.eyJpc3MiOiJodHRwczovL2xvY2FsaG9zdDo0MDAxIiwibmJmIjoxNjUwOTI0MzMyLCJpYXQiOjE2NTA5MjQzMzIsImV4cCI6MTY1MDkyNzkzMiwic2NvcGUiOlsiYXBpMSJdLCJjbGllbnRfaWQiOiJjbGllbnQiLCJqdGkiOiIwMTM2MTRFNzc1MzQ0QUU2MzNGNDcxNjY1NzE2Nzg0NCJ9.UcupzBVjx7cjkVQeR9KGlb7NZi4Ef6K3AhGh_-E9kY4rSGHZH7lJXKUW8HYhC0x6QYnWU3mlvogTlvQ5cIhoNLJRejCQ8LaXXrY012HDw2IMDYsDqhS4S9KJ8hTVgy80w8wzJUT26CyKKLEIZyWHXin7D8sJqRVQNApIOXWCs66EHLaoS_Wmzyo7AqNVVMGaujv9XgKdeXt_BWeWm0mnlVjCqul10p-RK4_y5MeJEVW8bQa7vfblkIvEet3znERhpFkRIzhegoRpdXGrC3syDlgb3vibPhMtqaezZIYnGzi7ibPDM6dBAuR3nZKy4s5tWJ9ck4Y84MWV5jY0lFr_jQ\",\"expires_in\":3600,\"token_type\":\"Bearer\",\"scope\":\"api1\"}",
+  "json": {
+    "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6IkMzRjdDN0ZGMUY2MjlCRUYwNkIwQjMxNjY3ODcwNUJEIiwidHlwIjoiYXQrand0In0.eyJpc3MiOiJodHRwczovL2xvY2FsaG9zdDo0MDAxIiwibmJmIjoxNjUwOTI0MzMyLCJpYXQiOjE2NTA5MjQzMzIsImV4cCI6MTY1MDkyNzkzMiwic2NvcGUiOlsiYXBpMSJdLCJjbGllbnRfaWQiOiJjbGllbnQiLCJqdGkiOiIwMTM2MTRFNzc1MzQ0QUU2MzNGNDcxNjY1NzE2Nzg0NCJ9.UcupzBVjx7cjkVQeR9KGlb7NZi4Ef6K3AhGh_-E9kY4rSGHZH7lJXKUW8HYhC0x6QYnWU3mlvogTlvQ5cIhoNLJRejCQ8LaXXrY012HDw2IMDYsDqhS4S9KJ8hTVgy80w8wzJUT26CyKKLEIZyWHXin7D8sJqRVQNApIOXWCs66EHLaoS_Wmzyo7AqNVVMGaujv9XgKdeXt_BWeWm0mnlVjCqul10p-RK4_y5MeJEVW8bQa7vfblkIvEet3znERhpFkRIzhegoRpdXGrC3syDlgb3vibPhMtqaezZIYnGzi7ibPDM6dBAuR3nZKy4s5tWJ9ck4Y84MWV5jY0lFr_jQ",
+    "expires_in": 3600,
+    "token_type": "Bearer",
+    "scope": "api1"
+  },
+  "exception": null,
+  "isError": false,
+  "errorType": 0,
+  "httpStatusCode": 200,
+  "httpErrorReason": "OK",
+  "error": null
+}
