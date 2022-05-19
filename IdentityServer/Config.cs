@@ -8,13 +8,32 @@ public static class Config
         new IdentityResource[]
         {
             new IdentityResources.OpenId(),
-            new IdentityResources.Profile()
+            new IdentityResources.Profile(),
+            new IdentityResource
+            {
+                Name = "role",
+                UserClaims = new List<string> { "role" }
+            }
         };
 
     public static IEnumerable<ApiScope> ApiScopes =>
         new ApiScope[]
         {
-            new ApiScope(name: "api1", displayName: "MyAPI"),
+            new ApiScope(name: "api1.read", displayName: "api1 read access")
+        };
+
+    public static IEnumerable<ApiResource> ApiResources =>
+        new[]
+        {
+            new ApiResource
+            {
+                Name = "api1",
+                DisplayName = "Api 1 demo",
+                Description = "Test of api resource",
+                Scopes = new List<string> { "api1.read", "api1.write" },
+                ApiSecrets = new List<Secret> { new Secret("ScopeSecret".Sha256()) },
+                UserClaims = new List<string> { "role" }
+            }
         };
 
     public static IEnumerable<Client> Clients =>
@@ -28,7 +47,7 @@ public static class Config
                 // secret for authentication
                 ClientSecrets = { new Secret("secret".Sha256()) },
                 // scopes that client has access to
-                AllowedScopes = { "api1" },
+                AllowedScopes = { "api1.read" },
                 Enabled = true
             },
             new Client
@@ -38,7 +57,7 @@ public static class Config
                 // secret for authentication
                 ClientSecrets = { new Secret("secret2".Sha256()) },
                 // scopes that client has access to
-                AllowedScopes = { "openid", "api1" },
+                AllowedScopes = { "openid", "api1.read" },
                 RedirectUris = { "https://localhost:5001/identity/tokenfromcode" },
                 RequirePkce = false,
                 Enabled = true

@@ -17,7 +17,7 @@ namespace WebApi.Controllers;
 public class IdentityController : ControllerBase
 {
     public const string DiscoveryUrl = ".well-known/openid-configuration";
-    public const string VerificationStateString = "Verification state string";
+    public const string VerificationStateString = "Verification state";
     private readonly ILogger<IdentityController> _logger;
     private readonly LinkGenerator _linkGenerator;
     private readonly string _serverUrl;
@@ -88,7 +88,7 @@ public class IdentityController : ControllerBase
             responseType: OidcConstants.ResponseTypes.Code,
             redirectUri: _linkGenerator.GetUriByAction(HttpContext, nameof(GetTokenFromCode)),
             state: VerificationStateString,
-            scope: "openid api1"
+            scope: "openid api1.read"
         );
         _logger.LogInformation("Authorization request: {AuthRequest}", codeUrl);
         return Redirect(codeUrl);
