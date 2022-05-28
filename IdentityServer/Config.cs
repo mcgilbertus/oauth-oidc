@@ -1,4 +1,6 @@
-﻿using Duende.IdentityServer.Models;
+﻿using System.Security.Claims;
+using Duende.IdentityServer;
+using Duende.IdentityServer.Models;
 
 namespace IdentityServer;
 
@@ -46,6 +48,11 @@ public static class Config
                 AllowedGrantTypes = GrantTypes.ClientCredentials,
                 // secret for authentication
                 ClientSecrets = { new Secret("secret".Sha256()) },
+                Claims = new List<ClientClaim>
+                {
+                    new ClientClaim(ClaimTypes.GivenName, "John"),
+                    new ClientClaim(ClaimTypes.Email, "john123@demoserver.com")
+                },
                 // scopes that client has access to
                 AllowedScopes = { "api1.read" },
                 Enabled = true
@@ -59,7 +66,7 @@ public static class Config
                 // scopes that client has access to
                 AllowedScopes = { "openid", "api1.read" },
                 RedirectUris = { "https://localhost:5001/identity/tokenfromcode" },
-                RequirePkce = false,
+                RequirePkce = true,
                 Enabled = true
             }
         };

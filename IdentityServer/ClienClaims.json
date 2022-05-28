@@ -1,0 +1,52 @@
+﻿[
+  {
+    "type": "iss",
+    "value": "https://localhost:4001",
+    "valueType": "http://www.w3.org/2001/XMLSchema#string"
+  },
+  {
+    "type": "nbf",
+    "value": "1653736896",
+    "valueType": "http://www.w3.org/2001/XMLSchema#integer"
+  },
+  {
+    "type": "iat",
+    "value": "1653736896",
+    "valueType": "http://www.w3.org/2001/XMLSchema#integer"
+  },
+  {
+    "type": "exp",
+    "value": "1653740496",
+    "valueType": "http://www.w3.org/2001/XMLSchema#integer"
+  },
+  {
+    "type": "aud",
+    "value": "api1",
+    "valueType": "http://www.w3.org/2001/XMLSchema#string"
+  },
+  {
+    "type": "scope",
+    "value": "api1.read",
+    "valueType": "http://www.w3.org/2001/XMLSchema#string"
+  },
+  {
+    "type": "client_id",
+    "value": "client",
+    "valueType": "http://www.w3.org/2001/XMLSchema#string"
+  },
+  {
+    "type": "client_http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname",
+    "value": "John",
+    "valueType": "http://www.w3.org/2001/XMLSchema#string"
+  },
+  {
+    "type": "client_http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress",
+    "value": "john123@demoserver.com",
+    "valueType": "http://www.w3.org/2001/XMLSchema#string"
+  },
+  {
+    "type": "jti",
+    "value": "E560C15F12E6F109DBC0A5ED8572B636",
+    "valueType": "http://www.w3.org/2001/XMLSchema#string"
+  }
+]

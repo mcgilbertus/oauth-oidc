@@ -1,12 +1,10 @@
-﻿using System.Net.Sockets;
-using System.Text.Json.Nodes;
-using System.Transactions;
+﻿using System.Security.Cryptography;
+using System.Text;
 using IdentityModel;
 using IdentityModel.Client;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 using WebApi.models;
 
 namespace WebApi.Controllers;
@@ -36,7 +34,12 @@ public class IdentityController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpPost("login")]
+    [HttpPost("clientlogin")]
+    [SwaggerOperation(
+        Summary = "ClientCredentials flow",
+        Description = "Gets an access token from the identity server using CLIENT CREDENTIALS flow",
+        Tags = new[] { "IdentityServer Tokens" }
+    )]
     public async Task<IActionResult> Login([FromBody] LoginModel login)
     {
         // get a token from identity server using ClientCredentials flow
@@ -53,7 +56,7 @@ public class IdentityController : ControllerBase
                 Address = tokenEndpoint,
                 ClientId = login.ClientId,
                 ClientSecret = login.ClientSecret,
-                Scope = "api1"
+                Scope = "api1.read"
             });
 
         // (b) using plain HttpClient
@@ -76,8 +79,13 @@ public class IdentityController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpGet("code")]
-    public async Task<IActionResult> AuthorizationCode()
+    [HttpGet("code/{pkce:bool}")]
+    [SwaggerOperation(
+        Summary = "Code flow",
+        Description = "Gets an access token from the identity server using CODE (with optional PKCE) flow",
+        Tags = new[] { "IdentityServer Tokens" }
+    )]
+    public async Task<IActionResult> AuthorizationCode(bool pkce)
     {
         // get a token from identity server using Authorization Code flow
         var discoveryDoc = await GetDiscoveryDocument();
@@ -88,17 +96,32 @@ public class IdentityController : ControllerBase
             responseType: OidcConstants.ResponseTypes.Code,
             redirectUri: _linkGenerator.GetUriByAction(HttpContext, nameof(GetTokenFromCode)),
             state: VerificationStateString,
-            scope: "openid api1.read"
+            scope: "openid api1.read",
+            codeChallenge: pkce ? GetPkce() : null,
+            codeChallengeMethod: pkce ? OidcConstants.CodeChallengeMethods.Sha256 : null
         );
         _logger.LogInformation("Authorization request: {AuthRequest}", codeUrl);
         return Redirect(codeUrl);
     }
 
+    private string GetPkce()
+    {
+        var codeVerifier = Guid.NewGuid().ToString();
+        using var sha256 = SHA256.Create();
+        var challengeBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(codeVerifier));
+        return Base64Url.Encode(challengeBytes);
+    }
+
     [AllowAnonymous]
     [HttpGet("tokenfromcode")]
-    public async Task<IActionResult> GetTokenFromCode([FromQuery]string code, [FromQuery]string state)
+    [SwaggerOperation(
+        Summary = "Code flow",
+        Description = "Endpoint to be called by the identity server with a code, connects again to get the token",
+        Tags = new[] { "IdentityServer Tokens" }
+    )]
+    public async Task<IActionResult> GetTokenFromCode([FromQuery] string code, [FromQuery] string state)
     {
-        _logger.LogInformation("RedirectUrl called with code={Code}",code);
+        _logger.LogInformation("RedirectUrl called with code={Code}", code);
         if (state != VerificationStateString)
             throw new BadHttpRequestException("State is wrong!");
 
@@ -115,18 +138,28 @@ public class IdentityController : ControllerBase
             });
         if (tokenResponse.IsError)
             throw new BadHttpRequestException(tokenResponse.Error);
-        
+
         _logger.LogInformation("Token response: {TokenResponse}", tokenResponse);
-        
+
         return Ok(tokenResponse);
     }
 
-    [HttpGet]
+    [HttpGet("claims")]
+    [SwaggerOperation(
+        Summary = "List user claims",
+        Description = "Gets a list of current logged-in user's claims",
+        Tags = new[] { "AspNet Core Identity" }
+    )]
     public IActionResult GetClaims()
     {
-        return Ok(User.Claims.Select(c => new { c.Type, c.Value }).ToArray());
+        return Ok(User.Claims.Select(c => new { c.Type, c.Value, c.ValueType }).ToArray());
     }
-    
+
+    /// <summary>
+    /// Retrieves the discovery document from the server and caches it in private property
+    /// </summary>
+    /// <returns></returns>
+    /// <exception cref="BadHttpRequestException"></exception>
     private async Task<DiscoveryDocumentResponse> GetDiscoveryDocument()
     {
         // (a) using IdentityModel library
@@ -142,6 +175,4 @@ public class IdentityController : ControllerBase
         // var discoveryDoc = JsonNode.Parse(discoveryStr);
         return _discoveryDoc;
     }
-
-
 }

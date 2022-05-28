@@ -44,6 +44,7 @@ builder.Services.AddSwaggerGen(config =>
     {
         { securityScheme, new string[] { } }
     });
+    config.EnableAnnotations();
 });
 
 builder.Services.AddCors();
