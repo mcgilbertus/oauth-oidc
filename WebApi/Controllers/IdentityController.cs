@@ -16,11 +16,14 @@ public class IdentityController : ControllerBase
 {
     public const string DiscoveryUrl = ".well-known/openid-configuration";
     public const string VerificationStateString = "Verification state";
+    //between 45 and 128 characters! it *should* be cryptographically random. See https://www.oauth.com/oauth2-servers/pkce/authorization-request/
+    public const string CodeVerifier = "this_is_a_verifier_string_que_tiene_que_tener_mas_de_45_caracteres";
     private readonly ILogger<IdentityController> _logger;
     private readonly LinkGenerator _linkGenerator;
     private readonly string _serverUrl;
     private readonly HttpClient _client;
     private DiscoveryDocumentResponse? _discoveryDoc;
+    private string _pkce;
 
     public IdentityController(IConfiguration configuration,
         ILogger<IdentityController> logger,
@@ -43,6 +46,7 @@ public class IdentityController : ControllerBase
     public async Task<IActionResult> Login([FromBody] LoginModel login)
     {
         // get a token from identity server using ClientCredentials flow
+        // use client_id / secret
         var discoveryDoc = await GetDiscoveryDocument();
 
         _logger.LogInformation("{DiscoveryDoc}", discoveryDoc);
@@ -58,22 +62,6 @@ public class IdentityController : ControllerBase
                 ClientSecret = login.ClientSecret,
                 Scope = "api1.read"
             });
-
-        // (b) using plain HttpClient
-        // var tokenUrl = discoveryDoc!["token_endpoint"]?.ToString();
-        // var parameters = new Dictionary<string, string>
-        // {
-        // { "address", tokenUrl },
-        // { "client_id", login.ClientId },
-        // { "client_secret", login.ClientSecret },
-        // { "grant_type", "client_credentials" },
-        // { "scope", "api1" }
-        // };
-        // using var request = new HttpRequestMessage(HttpMethod.Post, tokenUrl);
-        // request.Headers.Add("Accept", "application/json");
-        // request.Content = new FormUrlEncodedContent(parameters);
-        // var tokenResponse = client.SendAsync(request);
-        // var tokenStr = await tokenResponse.Result.Content.ReadAsStringAsync();
 
         return Ok(tokenStr);
     }
@@ -91,24 +79,25 @@ public class IdentityController : ControllerBase
         var discoveryDoc = await GetDiscoveryDocument();
         // 2. get code from the server
         var reqUrl = new RequestUrl(discoveryDoc.AuthorizeEndpoint);
+        var pkceStr = pkce ? GetCodeChallenge() : null;
+        _logger.LogDebug("pkce in AuthCode: {pkce}", pkceStr);
         var codeUrl = reqUrl.CreateAuthorizeUrl(
-            clientId: "client2",
+            clientId: pkce ? "client_pkce" : "client_code",
             responseType: OidcConstants.ResponseTypes.Code,
             redirectUri: _linkGenerator.GetUriByAction(HttpContext, nameof(GetTokenFromCode)),
             state: VerificationStateString,
             scope: "openid api1.read",
-            codeChallenge: pkce ? GetPkce() : null,
+            codeChallenge: pkceStr,
             codeChallengeMethod: pkce ? OidcConstants.CodeChallengeMethods.Sha256 : null
         );
         _logger.LogInformation("Authorization request: {AuthRequest}", codeUrl);
         return Redirect(codeUrl);
     }
 
-    private string GetPkce()
+    private string GetCodeChallenge()
     {
-        var codeVerifier = Guid.NewGuid().ToString();
         using var sha256 = SHA256.Create();
-        var challengeBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(codeVerifier));
+        var challengeBytes = sha256.ComputeHash(Encoding.ASCII.GetBytes(CodeVerifier));
         return Base64Url.Encode(challengeBytes);
     }
 
@@ -127,15 +116,16 @@ public class IdentityController : ControllerBase
 
         _logger.LogInformation("Action uri: {ActionUri}", Url.Action(nameof(GetTokenFromCode)));
         var discoveryDoc = GetDiscoveryDocument();
-        var tokenResponse = await _client.RequestAuthorizationCodeTokenAsync(
-            new AuthorizationCodeTokenRequest()
-            {
-                Address = discoveryDoc.Result.TokenEndpoint,
-                Code = code,
-                ClientId = "client2",
-                ClientSecret = "secret2",
-                RedirectUri = _linkGenerator.GetUriByAction(HttpContext)
-            });
+        var authCodeRequest = new AuthorizationCodeTokenRequest()
+        {
+            Address = discoveryDoc.Result.TokenEndpoint,
+            Code = code,
+            ClientId = "client_pkce",
+            ClientSecret = "secret",
+            CodeVerifier = CodeVerifier,
+            RedirectUri = _linkGenerator.GetUriByAction(HttpContext)
+        };
+        var tokenResponse = await _client.RequestAuthorizationCodeTokenAsync(authCodeRequest);
         if (tokenResponse.IsError)
             throw new BadHttpRequestException(tokenResponse.Error);
 

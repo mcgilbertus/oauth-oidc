@@ -43,7 +43,7 @@ public static class Config
         {
             new Client
             {
-                ClientId = "client",
+                ClientId = "client_id",
                 // no interactive user, use the clientid/secret for authentication
                 AllowedGrantTypes = GrantTypes.ClientCredentials,
                 // secret for authentication
@@ -59,10 +59,22 @@ public static class Config
             },
             new Client
             {
-                ClientId = "client2",
+                ClientId = "client_code",
                 AllowedGrantTypes = GrantTypes.Code,
                 // secret for authentication
-                ClientSecrets = { new Secret("secret2".Sha256()) },
+                ClientSecrets = { new Secret("secret".Sha256()) },
+                // scopes that client has access to
+                AllowedScopes = { "openid", "api1.read" },
+                RedirectUris = { "https://localhost:5001/identity/tokenfromcode" },
+                RequirePkce = false,
+                Enabled = true
+            },
+            new Client
+            {
+                ClientId = "client_pkce",
+                AllowedGrantTypes = GrantTypes.Code,
+                // secret for authentication
+                ClientSecrets = { new Secret("secret".Sha256()) },
                 // scopes that client has access to
                 AllowedScopes = { "openid", "api1.read" },
                 RedirectUris = { "https://localhost:5001/identity/tokenfromcode" },

@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServer", "IdentityS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi", "WebApi\WebApi.csproj", "{1C604CFA-42CF-461D-8C8B-831E57A47F40}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{DDEFEFEB-85D2-4C0B-8D53-C5EAC13307C7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{1C604CFA-42CF-461D-8C8B-831E57A47F40}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C604CFA-42CF-461D-8C8B-831E57A47F40}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1C604CFA-42CF-461D-8C8B-831E57A47F40}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDEFEFEB-85D2-4C0B-8D53-C5EAC13307C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDEFEFEB-85D2-4C0B-8D53-C5EAC13307C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDEFEFEB-85D2-4C0B-8D53-C5EAC13307C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDEFEFEB-85D2-4C0B-8D53-C5EAC13307C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
