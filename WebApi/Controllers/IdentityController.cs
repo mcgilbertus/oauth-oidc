@@ -15,7 +15,9 @@ namespace WebApi.Controllers;
 public class IdentityController : ControllerBase
 {
     public const string DiscoveryUrl = ".well-known/openid-configuration";
+
     public const string VerificationStateString = "Verification state";
+
     //between 45 and 128 characters! it *should* be cryptographically random. See https://www.oauth.com/oauth2-servers/pkce/authorization-request/
     public const string CodeVerifier = "this_is_a_verifier_string_que_tiene_que_tener_mas_de_45_caracteres";
     private readonly ILogger<IdentityController> _logger;
@@ -41,7 +43,7 @@ public class IdentityController : ControllerBase
     [SwaggerOperation(
         Summary = "ClientCredentials flow",
         Description = "Gets an access token from the identity server using CLIENT CREDENTIALS flow",
-        Tags = new[] { "IdentityServer Tokens" }
+        Tags = new[] {"IdentityServer Tokens"}
     )]
     public async Task<IActionResult> Login([FromBody] LoginModel login)
     {
@@ -71,20 +73,19 @@ public class IdentityController : ControllerBase
     [SwaggerOperation(
         Summary = "Code flow",
         Description = "Gets an access token from the identity server using CODE (with optional PKCE) flow",
-        Tags = new[] { "IdentityServer Tokens" }
+        Tags = new[] {"IdentityServer Tokens"}
     )]
-    public async Task<IActionResult> AuthorizationCode(bool pkce)
+    public async Task<IActionResult> AuthorizationCode(bool pkce = false)
     {
         // get a token from identity server using Authorization Code flow
         var discoveryDoc = await GetDiscoveryDocument();
         // 2. get code from the server
         var reqUrl = new RequestUrl(discoveryDoc.AuthorizeEndpoint);
         var pkceStr = pkce ? GetCodeChallenge() : null;
-        _logger.LogDebug("pkce in AuthCode: {pkce}", pkceStr);
         var codeUrl = reqUrl.CreateAuthorizeUrl(
             clientId: pkce ? "client_pkce" : "client_code",
             responseType: OidcConstants.ResponseTypes.Code,
-            redirectUri: _linkGenerator.GetUriByAction(HttpContext, nameof(GetTokenFromCode)),
+            redirectUri: _linkGenerator.GetUriByAction(HttpContext, pkce ? nameof(GetTokenFromCodePkce) : nameof(GetTokenFromCode)),
             state: VerificationStateString,
             scope: "openid api1.read",
             codeChallenge: pkceStr,
@@ -102,15 +103,48 @@ public class IdentityController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpGet("tokenfromcode")]
+    [HttpGet("private/tokenfromcode")]
     [SwaggerOperation(
         Summary = "Code flow",
         Description = "Endpoint to be called by the identity server with a code, connects again to get the token",
-        Tags = new[] { "IdentityServer Tokens" }
+        Tags = new[] {"IdentityServer Tokens"}
     )]
     public async Task<IActionResult> GetTokenFromCode([FromQuery] string code, [FromQuery] string state)
     {
         _logger.LogInformation("RedirectUrl called with code={Code}", code);
+        if (state != VerificationStateString)
+            throw new BadHttpRequestException("State is wrong!");
+
+        _logger.LogInformation("Action uri: {ActionUri}", Url.Action(nameof(GetTokenFromCode)));
+        var discoveryDoc = GetDiscoveryDocument();
+        var authCodeRequest = new AuthorizationCodeTokenRequest()
+        {
+            Address = discoveryDoc.Result.TokenEndpoint,
+            Code = code,
+            ClientId = "client_code",
+            ClientSecret = "secret",
+            CodeVerifier = null,
+            RedirectUri = _linkGenerator.GetUriByAction(HttpContext)
+        };
+        var tokenResponse = await _client.RequestAuthorizationCodeTokenAsync(authCodeRequest);
+        if (tokenResponse.IsError)
+            throw new BadHttpRequestException(tokenResponse.Error);
+
+        _logger.LogInformation("Token response: {TokenResponse}", tokenResponse);
+
+        return Ok(tokenResponse);
+    }
+
+    [AllowAnonymous]
+    [HttpGet("private/tokenfromcodepkce")]
+    [SwaggerOperation(
+        Summary = "Code flow-PKCE",
+        Description = "Endpoint to be called by the identity server with a code, connects again to get the token",
+        Tags = new[] {"IdentityServer Tokens"}
+    )]
+    public async Task<IActionResult> GetTokenFromCodePkce([FromQuery] string code, [FromQuery] string state)
+    {
+        _logger.LogInformation("RedirectUrl (pkce) called with code={Code}", code);
         if (state != VerificationStateString)
             throw new BadHttpRequestException("State is wrong!");
 
@@ -138,11 +172,11 @@ public class IdentityController : ControllerBase
     [SwaggerOperation(
         Summary = "List user claims",
         Description = "Gets a list of current logged-in user's claims",
-        Tags = new[] { "AspNet Core Identity" }
+        Tags = new[] {"AspNet Core Identity"}
     )]
     public IActionResult GetClaims()
     {
-        return Ok(User.Claims.Select(c => new { c.Type, c.Value, c.ValueType }).ToArray());
+        return Ok(User.Claims.Select(c => new {c.Type, c.Value, c.ValueType}).ToArray());
     }
 
     /// <summary>

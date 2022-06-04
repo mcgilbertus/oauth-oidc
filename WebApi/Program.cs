@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using WebApi.swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,8 @@ builder.Services.AddControllers();
 // builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(config =>
 {
+    // add filter to hide paths with '/private' in them
+    config.DocumentFilter<SwaggerPrivateFilter>();
     // add bearer token support to swagger page
     var securityScheme = new OpenApiSecurityScheme
     {

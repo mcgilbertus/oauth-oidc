@@ -65,7 +65,7 @@ public static class Config
                 ClientSecrets = { new Secret("secret".Sha256()) },
                 // scopes that client has access to
                 AllowedScopes = { "openid", "api1.read" },
-                RedirectUris = { "https://localhost:5001/identity/tokenfromcode" },
+                RedirectUris = { "https://localhost:5001/identity/private/tokenfromcode" },
                 RequirePkce = false,
                 Enabled = true
             },
@@ -77,7 +77,7 @@ public static class Config
                 ClientSecrets = { new Secret("secret".Sha256()) },
                 // scopes that client has access to
                 AllowedScopes = { "openid", "api1.read" },
-                RedirectUris = { "https://localhost:5001/identity/tokenfromcode" },
+                RedirectUris = { "https://localhost:5001/identity/private/tokenfromcodepkce" },
                 RequirePkce = true,
                 Enabled = true
             }
