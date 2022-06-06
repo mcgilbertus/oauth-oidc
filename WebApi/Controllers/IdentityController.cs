@@ -34,6 +34,7 @@ public class IdentityController : ControllerBase
         _logger = logger;
         _linkGenerator = linkGenerator;
         _serverUrl = configuration.GetValue("IdentityServer:url", "https://localhost:4001");
+        /// OJO esta forma de crear un httpclient no es buena, ver el articulo sobre ihttpclientfactory
         _client = new HttpClient();
         _discoveryDoc = GetDiscoveryDocument().Result;
     }
@@ -43,7 +44,7 @@ public class IdentityController : ControllerBase
     [SwaggerOperation(
         Summary = "ClientCredentials flow",
         Description = "Gets an access token from the identity server using CLIENT CREDENTIALS flow",
-        Tags = new[] {"IdentityServer Tokens"}
+        Tags = new[] { "IdentityServer Tokens" }
     )]
     public async Task<IActionResult> Login([FromBody] LoginModel login)
     {
@@ -69,29 +70,23 @@ public class IdentityController : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpGet("code/{pkce:bool}")]
+    [HttpGet("code")]
     [SwaggerOperation(
         Summary = "Code flow",
-        Description = "Gets an access token from the identity server using CODE (with optional PKCE) flow",
-        Tags = new[] {"IdentityServer Tokens"}
+        Description = "Gets an access token from the identity server using CODE flow without PKCE",
+        Tags = new[] { "IdentityServer Tokens" }
     )]
-    public async Task<IActionResult> AuthorizationCode(bool pkce = false)
+    public async Task<IActionResult> AuthorizationCode()
     {
-        // get a token from identity server using Authorization Code flow
         var discoveryDoc = await GetDiscoveryDocument();
-        // 2. get code from the server
         var reqUrl = new RequestUrl(discoveryDoc.AuthorizeEndpoint);
-        var pkceStr = pkce ? GetCodeChallenge() : null;
         var codeUrl = reqUrl.CreateAuthorizeUrl(
-            clientId: pkce ? "client_pkce" : "client_code",
+            clientId: "client_code",
             responseType: OidcConstants.ResponseTypes.Code,
-            redirectUri: _linkGenerator.GetUriByAction(HttpContext, pkce ? nameof(GetTokenFromCodePkce) : nameof(GetTokenFromCode)),
+            redirectUri: _linkGenerator.GetUriByAction(HttpContext, nameof(GetTokenFromCode)),
             state: VerificationStateString,
-            scope: "openid api1.read",
-            codeChallenge: pkceStr,
-            codeChallengeMethod: pkce ? OidcConstants.CodeChallengeMethods.Sha256 : null
+            scope: "openid api1.read"
         );
-        _logger.LogInformation("Authorization request: {AuthRequest}", codeUrl);
         return Redirect(codeUrl);
     }
 
@@ -103,11 +98,34 @@ public class IdentityController : ControllerBase
     }
 
     [AllowAnonymous]
+    [HttpGet("codepkce")]
+    [SwaggerOperation(
+        Summary = "Code flow with PKCE",
+        Description = "Gets an access token from the identity server using CODE flow with PKCE",
+        Tags = new[] { "IdentityServer Tokens" }
+    )]
+    public async Task<IActionResult> AuthorizationCodePkce()
+    {
+        var discoveryDoc = await GetDiscoveryDocument();
+        var reqUrl = new RequestUrl(discoveryDoc.AuthorizeEndpoint);
+        var codeUrl = reqUrl.CreateAuthorizeUrl(
+            clientId: "client_code",
+            responseType: OidcConstants.ResponseTypes.Code,
+            redirectUri: _linkGenerator.GetUriByAction(HttpContext, nameof(GetTokenFromCodePkce)),
+            state: VerificationStateString,
+            scope: "openid api1.read",
+            codeChallenge: GetCodeChallenge(),
+            codeChallengeMethod: OidcConstants.CodeChallengeMethods.Sha256
+        );
+        return Redirect(codeUrl);
+    }
+
+    [AllowAnonymous]
     [HttpGet("private/tokenfromcode")]
     [SwaggerOperation(
         Summary = "Code flow",
         Description = "Endpoint to be called by the identity server with a code, connects again to get the token",
-        Tags = new[] {"IdentityServer Tokens"}
+        Tags = new[] { "IdentityServer Tokens" }
     )]
     public async Task<IActionResult> GetTokenFromCode([FromQuery] string code, [FromQuery] string state)
     {
@@ -140,7 +158,7 @@ public class IdentityController : ControllerBase
     [SwaggerOperation(
         Summary = "Code flow-PKCE",
         Description = "Endpoint to be called by the identity server with a code, connects again to get the token",
-        Tags = new[] {"IdentityServer Tokens"}
+        Tags = new[] { "IdentityServer Tokens" }
     )]
     public async Task<IActionResult> GetTokenFromCodePkce([FromQuery] string code, [FromQuery] string state)
     {
@@ -172,11 +190,11 @@ public class IdentityController : ControllerBase
     [SwaggerOperation(
         Summary = "List user claims",
         Description = "Gets a list of current logged-in user's claims",
-        Tags = new[] {"AspNet Core Identity"}
+        Tags = new[] { "AspNet Core Identity" }
     )]
     public IActionResult GetClaims()
     {
-        return Ok(User.Claims.Select(c => new {c.Type, c.Value, c.ValueType}).ToArray());
+        return Ok(User.Claims.Select(c => new { c.Type, c.Value, c.ValueType }).ToArray());
     }
 
     /// <summary>
